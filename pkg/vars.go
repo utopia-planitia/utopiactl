@@ -1,4 +1,4 @@
-package main
+package utopia
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/otiai10/copy"
 )
 
-func vars(repoPath, customizePath string) error {
+func Vars(repoPath, customizePath string) error {
 	err := copyIfExists(repoPath, customizePath, "host_vars")
 	if err != nil {
 		return fmt.Errorf("failed to copy host_vars: %v", err)

@@ -1,11 +1,11 @@
-package main
+package utopia
 
 import (
 	"fmt"
 	"io/ioutil"
 )
 
-func repositories(cwd string, args []string) ([]string, error) {
+func Repositories(cwd string, args []string) ([]string, error) {
 	if len(args) != 0 {
 		return args, nil
 	}
