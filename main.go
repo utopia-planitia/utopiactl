@@ -36,7 +36,10 @@ func main() {
 			log.Fatalf("failed to copy vars from %v: %v", customizePath, err)
 		}
 
-		filepath.Walk(repoPath, utopia.Walk(customizePath, repo, cwd))
+		err = filepath.Walk(repoPath, utopia.Walk(customizePath, repo, cwd))
+		if err != nil {
+			log.Fatalf("failed to customize %v: %v", repo, err)
+		}
 
 		// prerender for example certificates
 	}

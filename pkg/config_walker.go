@@ -8,6 +8,8 @@ import (
 	"github.com/otiai10/copy"
 )
 
+const jinjaSuffix = ".j2"
+
 func Walk(customizePath, repo, cwd string) filepath.WalkFunc {
 	return func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -21,7 +23,9 @@ func Walk(customizePath, repo, cwd string) filepath.WalkFunc {
 			return os.MkdirAll(dest, 0755)
 		}
 
-		// render jinja2 config templates
+		if strings.HasSuffix(info.Name(), jinjaSuffix) {
+			renderJinja2(customizePath, path, dest)
+		}
 
 		return copy.Copy(path, dest)
 	}
