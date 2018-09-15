@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/alecthomas/template"
 )
@@ -15,15 +16,20 @@ const playbookSource = `
 ---
 - hosts: localhost
   tasks:
-	- name: render configuration template
-	  template:
-		src: "{{ src }}"
-		dest: "{{ dest }}"
+  - name: render configuration template
+    template:
+      src: "{{ .Src }}"
+      dest: "{{ .Dest }}"
 `
 
-func renderJinja2(customizePath, path, dest string) error {
+func renderJinja2(customizePath, src, dest string) error {
 
-	playbook, err := ioutil.TempFile(os.TempDir(), playbookPrefix)
+	src, err := filepath.Abs(src)
+	if err != nil {
+		return fmt.Errorf("failed to get absolute of src: %v", err)
+	}
+
+	playbook, err := ioutil.TempFile(customizePath, playbookPrefix)
 	if err != nil {
 		return fmt.Errorf("failed to create playbook: %v", err)
 	}
@@ -35,10 +41,10 @@ func renderJinja2(customizePath, path, dest string) error {
 	}
 
 	err = playbookTemplate.Execute(playbook, struct {
-		src, dest string
+		Src, Dest string
 	}{
-		src:  path,
-		dest: dest,
+		Src:  src,
+		Dest: dest,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to render playbook: %v", err)
@@ -49,15 +55,14 @@ func renderJinja2(customizePath, path, dest string) error {
 		return fmt.Errorf("failed to close playbook: %v", err)
 	}
 
-	return executeAnsiblePlaybook(customizePath, playbook.Name())
+	return executeAnsiblePlaybook(playbook.Name())
 }
 
-func executeAnsiblePlaybook(customizePath, playbook string) error {
-	cmd := exec.Command("ansible-playbook")
-	cmd.Dir = customizePath
+func executeAnsiblePlaybook(playbook string) error {
+	cmd := exec.Command("ansible-playbook", playbook)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Print(output)
+		log.Printf("ansible output: %s", output)
 		return fmt.Errorf("failed to execute ansible playbook: %v", err)
 	}
 	return nil
