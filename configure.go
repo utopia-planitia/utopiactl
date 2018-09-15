@@ -8,15 +8,14 @@ import (
 	"github.com/otiai10/copy"
 )
 
-const jinjaSuffix = ".j2"
-
-func renderConfig(customizePath, repo, cwd string) filepath.WalkFunc {
+func renderConfig(customizePath, repo, directory string) filepath.WalkFunc {
 	return func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
-		subPath := strings.TrimPrefix(cwd, path)
+		prefix := filepath.Join(directory, repo, templatesDir)
+		subPath := strings.TrimPrefix(path, prefix)
 		dest := filepath.Join(customizePath, repo, subPath)
 
 		if info.IsDir() {
@@ -24,7 +23,7 @@ func renderConfig(customizePath, repo, cwd string) filepath.WalkFunc {
 		}
 
 		if filepath.Ext(info.Name()) == jinjaSuffix {
-			renderJinja2(customizePath, path, dest)
+			return renderJinja2(customizePath, path, dest)
 		}
 
 		return copy.Copy(path, dest)

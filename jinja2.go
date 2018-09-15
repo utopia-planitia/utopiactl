@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/alecthomas/template"
 )
@@ -21,6 +22,7 @@ const playbookSource = `
       src: "{{ .Src }}"
       dest: "{{ .Dest }}"
 `
+const jinjaSuffix = ".j2"
 
 func renderJinja2(customizePath, src, dest string) error {
 
@@ -44,7 +46,7 @@ func renderJinja2(customizePath, src, dest string) error {
 		Src, Dest string
 	}{
 		Src:  src,
-		Dest: dest,
+		Dest: strings.TrimSuffix(dest, jinjaSuffix),
 	})
 	if err != nil {
 		return fmt.Errorf("failed to render playbook: %v", err)
