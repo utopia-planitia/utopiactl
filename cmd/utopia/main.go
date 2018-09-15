@@ -1,11 +1,12 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
-	"path/filepath"
 
-	"github.com/utopia-planitia/utopia-planitia"
+	utopia "github.com/utopia-planitia/utopia-planitia"
 )
 
 func main() {
@@ -14,28 +15,37 @@ func main() {
 		log.Fatalf("failed to determine current working directory: %v", err)
 	}
 
-	repos, err := utopia.Repositories(cwd, os.Args[1:])
+	repos, err := repositories(cwd, os.Args[1:])
 	if err != nil {
 		log.Fatalf("failed to setup config: %v", err)
 	}
 
-	customizePath := filepath.Join(cwd, "customize")
+	utopia.Customize(cwd, repos)
+}
 
-	for _, repo := range repos {
+func repositories(directory string, args []string) ([]string, error) {
+	if len(args) != 0 {
+		return args, nil
+	}
+	repos, err := subDirectories(directory)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list repositories: %v", err)
+	}
+	return repos, nil
+}
 
-		log.Println(repo)
+func subDirectories(path string) ([]string, error) {
+	contents, err := ioutil.ReadDir(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read dir: %v", err)
+	}
 
-		if repo == "customize" {
+	subDirectories := []string{}
+	for _, content := range contents {
+		if !content.IsDir() {
 			continue
 		}
-
-		repoPath := filepath.Join(cwd, repo)
-
-		err = filepath.Walk(repoPath, utopia.Walk(customizePath, repo, cwd))
-		if err != nil {
-			log.Fatalf("failed to customize %v: %v", repo, err)
-		}
-
-		// prerender for example certificates
+		subDirectories = append(subDirectories, content.Name())
 	}
+	return subDirectories, nil
 }

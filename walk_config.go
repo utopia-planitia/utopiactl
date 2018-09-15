@@ -10,7 +10,7 @@ import (
 
 const jinjaSuffix = ".j2"
 
-func Walk(customizePath, repo, cwd string) filepath.WalkFunc {
+func renderConfig(customizePath, repo, cwd string) filepath.WalkFunc {
 	return func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -23,7 +23,7 @@ func Walk(customizePath, repo, cwd string) filepath.WalkFunc {
 			return os.MkdirAll(dest, 0755)
 		}
 
-		if strings.HasSuffix(info.Name(), jinjaSuffix) {
+		if filepath.Ext(info.Name()) == jinjaSuffix {
 			renderJinja2(customizePath, path, dest)
 		}
 
