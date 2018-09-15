@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/utopia-planitia/utopia-planitia/pkg"
+	"github.com/utopia-planitia/utopia-planitia"
 )
 
 func main() {
