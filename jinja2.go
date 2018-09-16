@@ -38,7 +38,7 @@ func renderJinja2(customizePath string, t []jinja2Template) error {
 
 	playbookTemplate, err := template.New("playbook").Parse(playbookSource)
 	if err != nil {
-		return fmt.Errorf("failed to create playbook: %v", err)
+		return fmt.Errorf("failed to parse playbook template: %v", err)
 	}
 
 	err = playbookTemplate.Execute(playbook, t)
@@ -50,10 +50,6 @@ func renderJinja2(customizePath string, t []jinja2Template) error {
 	if err != nil {
 		return fmt.Errorf("failed to close playbook: %v", err)
 	}
-
-	c, _ := ioutil.ReadFile(playbook.Name())
-	log.Println(playbook.Name())
-	log.Printf("%+s", c)
 
 	return executeAnsiblePlaybook(playbook.Name())
 }

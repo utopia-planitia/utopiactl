@@ -20,7 +20,10 @@ func main() {
 		log.Fatalf("failed to setup config: %v", err)
 	}
 
-	utopia.Customize(cwd, repos)
+	err = utopia.Customize(cwd, repos)
+	if err != nil {
+		log.Fatalf("failed to setup config: %v", err)
+	}
 }
 
 func repositories(directory string, args []string) ([]string, error) {
