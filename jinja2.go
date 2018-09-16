@@ -6,8 +6,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"path/filepath"
-	"strings"
 
 	"github.com/alecthomas/template"
 )
@@ -17,19 +15,20 @@ const playbookSource = `
 ---
 - hosts: localhost
   tasks:
+{{ range . }}
   - name: render configuration template
     template:
       src: "{{ .Src }}"
       dest: "{{ .Dest }}"
+{{ end }}
 `
 const jinjaSuffix = ".j2"
 
-func renderJinja2(customizePath, src, dest string) error {
+type jinja2Template struct {
+	Src, Dest string
+}
 
-	src, err := filepath.Abs(src)
-	if err != nil {
-		return fmt.Errorf("failed to get absolute of src: %v", err)
-	}
+func renderJinja2(customizePath string, t []jinja2Template) error {
 
 	playbook, err := ioutil.TempFile(customizePath, playbookPrefix)
 	if err != nil {
@@ -42,12 +41,7 @@ func renderJinja2(customizePath, src, dest string) error {
 		return fmt.Errorf("failed to create playbook: %v", err)
 	}
 
-	err = playbookTemplate.Execute(playbook, struct {
-		Src, Dest string
-	}{
-		Src:  src,
-		Dest: strings.TrimSuffix(dest, jinjaSuffix),
-	})
+	err = playbookTemplate.Execute(playbook, t)
 	if err != nil {
 		return fmt.Errorf("failed to render playbook: %v", err)
 	}
@@ -56,6 +50,10 @@ func renderJinja2(customizePath, src, dest string) error {
 	if err != nil {
 		return fmt.Errorf("failed to close playbook: %v", err)
 	}
+
+	c, _ := ioutil.ReadFile(playbook.Name())
+	log.Println(playbook.Name())
+	log.Printf("%+s", c)
 
 	return executeAnsiblePlaybook(playbook.Name())
 }

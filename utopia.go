@@ -1,16 +1,18 @@
 package utopia
 
 import (
-	"log"
+	"fmt"
 	"path/filepath"
 )
 
 const customizedRepo = "customized"
 const templatesDir = "config-templates"
 
-func Customize(directory string, repos []string) {
+func Customize(directory string, repos []string) error {
 
 	customizedPath := filepath.Join(directory, customizedRepo)
+
+	jt := []jinja2Template{}
 
 	for _, repo := range repos {
 
@@ -20,12 +22,18 @@ func Customize(directory string, repos []string) {
 
 		repoPath := filepath.Join(directory, repo, templatesDir)
 
-		err := filepath.Walk(repoPath, renderConfig(customizedPath, repo, directory))
+		err := filepath.Walk(repoPath, parseConfig(&jt, customizedPath, repo, directory))
 		if err != nil {
-			log.Fatalf("failed to customize %v: %v", repo, err)
+			return fmt.Errorf("failed to customize %v: %v", repo, err)
 		}
 
 		// prerender for example certificates
 	}
 
+	err := renderJinja2(customizedPath, jt)
+	if err != nil {
+		return fmt.Errorf("failed to render jinja2 templates via ansible: %v", err)
+	}
+
+	return nil
 }
