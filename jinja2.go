@@ -6,8 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
-
-	"github.com/alecthomas/template"
+	"text/template"
 )
 
 const playbookPrefix = "playbook"

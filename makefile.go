@@ -7,8 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-
-	"github.com/alecthomas/template"
+	"text/template"
 )
 
 func makeConfigure(repoPath string) error {

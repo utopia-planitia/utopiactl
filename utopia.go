@@ -2,11 +2,10 @@ package utopia
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/otiai10/copy"
 )
 
 const customizedRepo = "customized"
@@ -78,6 +77,37 @@ func parseConfig(jinja2Templates *[]jinja2Template, customizePath, repo, directo
 			})
 		}
 
-		return copy.Copy(path, dest)
+		return copy(path, dest)
 	}
+}
+
+func copy(src, dest string) error {
+
+	info, err := os.Lstat(src)
+	if err != nil {
+		return fmt.Errorf("could not stat %s: %s", src, err)
+	}
+
+	f, err := os.Create(dest)
+	if err != nil {
+		return fmt.Errorf("could not create file %s: %s", dest, err)
+	}
+	defer f.Close()
+
+	if err = os.Chmod(f.Name(), info.Mode()); err != nil {
+		return fmt.Errorf("could not set permissions for file %s: %s", f.Name(), err)
+	}
+
+	s, err := os.Open(src)
+	if err != nil {
+		return fmt.Errorf("could not open source file %s: %s", src, err)
+	}
+	defer s.Close()
+
+	_, err = io.Copy(f, s)
+	if err != nil {
+		return fmt.Errorf("failed to copy from source to destination: %s", err)
+	}
+
+	return nil
 }
