@@ -10,9 +10,9 @@ import (
 	"text/template"
 )
 
-func makeConfigure(repoPath string) error {
+func makeConfigure(configTemplatesDir string) error {
 	cmd := exec.Command("make", "configure")
-	cmd.Dir = repoPath
+	cmd.Dir = configTemplatesDir
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Printf("make output: %s", output)

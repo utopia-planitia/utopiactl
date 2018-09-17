@@ -29,15 +29,18 @@ func Customize(directory string, repos []string) error {
 			continue
 		}
 
-		repoPath := filepath.Join(directory, repo, templatesDir)
+		configTemplatesDir := filepath.Join(directory, repo, templatesDir)
+		if _, err := os.Stat(configTemplatesDir); os.IsNotExist(err) {
+			continue
+		}
 
-		err := filepath.Walk(repoPath, parseConfig(&jt, customizedPath, repo, directory))
+		err := filepath.Walk(configTemplatesDir, parseConfig(&jt, customizedPath, repo, directory))
 		if err != nil {
 			return fmt.Errorf("customization failed for repo %v: %v", repo, err)
 		}
 
-		if _, err := os.Stat(filepath.Join(repoPath, "Makefile")); err == nil {
-			err = makeConfigure(repoPath)
+		if _, err := os.Stat(filepath.Join(configTemplatesDir, "Makefile")); err == nil {
+			err = makeConfigure(configTemplatesDir)
 			if err != nil {
 				return fmt.Errorf("make configure (%v): %v", repo, err)
 			}
