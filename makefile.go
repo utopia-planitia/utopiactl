@@ -33,7 +33,7 @@ make deploy: #@setup apply all configurations
 
 func generateMakefile(directory, customizedPath string) error {
 
-	repos, err := subDirectories(customizedPath)
+	repos, err := subDirectories(directory)
 	if err != nil {
 		return fmt.Errorf("failed to list repos: %v", err)
 	}
@@ -41,6 +41,10 @@ func generateMakefile(directory, customizedPath string) error {
 	makes := []string{}
 	applys := []string{}
 	for _, repo := range repos {
+		if skipRepo(directory, repo) {
+			continue
+		}
+
 		repoPath := filepath.Join(directory, repo, templatesDir)
 		if _, err := os.Stat(filepath.Join(repoPath, "Makefile")); err == nil {
 			makes = append(makes, repo)

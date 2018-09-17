@@ -25,14 +25,11 @@ func Customize(directory string, repos []string) error {
 
 	for _, repo := range repos {
 
-		if repo == customizedRepo {
+		if skipRepo(directory, repo) {
 			continue
 		}
 
 		configTemplatesDir := filepath.Join(directory, repo, templatesDir)
-		if _, err := os.Stat(configTemplatesDir); os.IsNotExist(err) {
-			continue
-		}
 
 		err := filepath.Walk(configTemplatesDir, parseConfig(&jt, customizedPath, repo, directory))
 		if err != nil {
@@ -60,6 +57,19 @@ func Customize(directory string, repos []string) error {
 	return nil
 }
 
+func skipRepo(directory, repo string) bool {
+	if repo == customizedRepo {
+		return true
+	}
+
+	configTemplatesDir := filepath.Join(directory, repo, templatesDir)
+	if _, err := os.Stat(configTemplatesDir); os.IsNotExist(err) {
+		return true
+	}
+
+	return false
+}
+
 func parseConfig(jinja2Templates *[]jinja2Template, customizePath, repo, directory string) filepath.WalkFunc {
 	return func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -74,19 +84,20 @@ func parseConfig(jinja2Templates *[]jinja2Template, customizePath, repo, directo
 			return os.MkdirAll(dest, 0755)
 		}
 
-		if filepath.Ext(info.Name()) == jinjaSuffix {
-			src, err := filepath.Abs(path)
-			if err != nil {
-				return fmt.Errorf("failed to get absolute of src: %v", err)
-			}
-			dest := strings.TrimSuffix(dest, jinjaSuffix)
-			*jinja2Templates = append(*jinja2Templates, jinja2Template{
-				Src:  src,
-				Dest: dest,
-			})
+		if filepath.Ext(info.Name()) != jinjaSuffix {
+			return copy(path, dest)
 		}
 
-		return copy(path, dest)
+		src, err := filepath.Abs(path)
+		if err != nil {
+			return fmt.Errorf("failed to get absolute of src: %v", err)
+		}
+		*jinja2Templates = append(*jinja2Templates, jinja2Template{
+			Src:  src,
+			Dest: strings.TrimSuffix(dest, jinjaSuffix),
+		})
+
+		return nil
 	}
 }
 
