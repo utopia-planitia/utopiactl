@@ -11,6 +11,12 @@ import (
 const customizedRepo = "customized"
 const templatesDir = "config-templates"
 
+// Customize updates the customized repository. All repositories are located in
+// directory, only repositories listen in repos are updated. It renders jinja2
+// templates using Ansible and creates a Makefile to apply the custom
+// configuration to Kubernetes.
+// Makefile targets 'make configure' and 'make deploy' are hooks to sidestep the
+// default template & kubectl behavior.
 func Customize(directory string, repos []string) error {
 
 	customizedPath := filepath.Join(directory, customizedRepo)
