@@ -10,17 +10,11 @@ import (
 
 func TestJinja(t *testing.T) {
 
-	dest1, err := ioutil.TempFile(os.TempDir(), "jinja2_test_dest")
+	dest, err := ioutil.TempFile(os.TempDir(), "jinja2_test_dest")
 	if err != nil {
 		t.Errorf("failed to create destination: %v", err)
 	}
-	defer os.Remove(dest1.Name())
-
-	dest2, err := ioutil.TempFile(os.TempDir(), "jinja2_test_dest")
-	if err != nil {
-		t.Errorf("failed to create destination: %v", err)
-	}
-	defer os.Remove(dest2.Name())
+	defer os.Remove(dest.Name())
 
 	src, err := filepath.Abs("testdata/jinja.input")
 	if err != nil {
@@ -29,10 +23,7 @@ func TestJinja(t *testing.T) {
 
 	jt := []jinja2Template{{
 		Src:  src,
-		Dest: dest1.Name(),
-	}, {
-		Src:  src,
-		Dest: dest2.Name(),
+		Dest: dest.Name(),
 	}}
 	err = renderJinja2("testdata", jt)
 	if err != nil {
@@ -44,19 +35,11 @@ func TestJinja(t *testing.T) {
 		t.Errorf("failed to read golden state: %v", err)
 	}
 
-	result1, err := ioutil.ReadFile(dest1.Name())
+	result, err := ioutil.ReadFile(dest.Name())
 	if err != nil {
 		t.Errorf("failed to read result: %v", err)
 	}
-	if bytes.Compare(result1, golden) != 0 {
-		t.Errorf("Jinja was incorrect, got: %+s, want: %+s.", result1, golden)
-	}
-
-	result2, err := ioutil.ReadFile(dest2.Name())
-	if err != nil {
-		t.Errorf("failed to read result: %v", err)
-	}
-	if bytes.Compare(result2, golden) != 0 {
-		t.Errorf("Jinja was incorrect, got: %+s, want: %+s.", result2, golden)
+	if bytes.Compare(result, golden) != 0 {
+		t.Errorf("Jinja was incorrect, got: %+s, want: %+s.", result, golden)
 	}
 }

@@ -1,3 +1,5 @@
 some text before
 {{ variable }}
 some text after
+
+{{ hostvars['node1'].inventory_hostname }}

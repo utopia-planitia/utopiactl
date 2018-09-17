@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"text/template"
 )
 
@@ -54,7 +55,8 @@ func renderJinja2(customizePath string, t []jinja2Template) error {
 }
 
 func executeAnsiblePlaybook(playbook string) error {
-	cmd := exec.Command("ansible-playbook", playbook)
+	cmd := exec.Command("ansible-playbook", filepath.Base(playbook))
+	cmd.Dir = filepath.Dir(playbook)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Printf("ansible output: %s", output)
