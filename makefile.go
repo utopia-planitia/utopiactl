@@ -10,9 +10,12 @@ import (
 	"text/template"
 )
 
-func makeConfigure(configTemplatesDir string) error {
+func makeConfigure(generatedConfigDir string) error {
 	cmd := exec.Command("make", "configure")
-	cmd.Dir = configTemplatesDir
+	cmd.Dir = generatedConfigDir
+	cmd.Env = append(os.Environ(),
+		fmt.Sprintf("PWD=%s", generatedConfigDir),
+	)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Printf("make output: %s", output)
@@ -25,11 +28,17 @@ const makefileSource = `
 include ../kubernetes/etc/help.mk
 include ../kubernetes/etc/cli.mk
 
-make deploy: #@setup apply all configurations
-	kubectl apply -r -f{{ range .Applys }} {{ . }}{{ end }}{{ range .Makes }}
-	$(MAKE) -C {{ . }} deploy{{ end }}
+deploy: applications configurations ##@setup apply all applications and configurations
 
-`
+applications: ##@setup apply all applications{{ range .Applications }}
+	cd ../{{ . }} && make deploy{{ end }}
+
+configurations: ##@setup apply all configurations
+	$(CLI) kubectl apply -R \
+{{ range .Applys }}		-f {{ . }} \
+{{ end }}
+{{ range .Makes }}	cd {{ . }} && make deploy
+{{ end }}`
 
 func generateMakefile(directory, customizedPath string) error {
 
@@ -40,12 +49,20 @@ func generateMakefile(directory, customizedPath string) error {
 
 	makes := []string{}
 	applys := []string{}
+	applications := []string{}
 	for _, repo := range repos {
-		if skipRepo(directory, repo) {
+
+		if repo == customizedRepo || repo == "hetzner" || repo == "kubernetes" {
 			continue
 		}
 
+		applications = append(applications, repo)
+
 		repoPath := filepath.Join(directory, repo, templatesDir)
+		if _, err := os.Stat(repoPath); os.IsNotExist(err) {
+			continue
+		}
+
 		if _, err := os.Stat(filepath.Join(repoPath, "Makefile")); err == nil {
 			makes = append(makes, repo)
 		} else {
@@ -69,11 +86,13 @@ func generateMakefile(directory, customizedPath string) error {
 	}
 
 	err = makefileTemplate.Execute(makefile, struct {
-		Makes  []string
-		Applys []string
+		Makes        []string
+		Applys       []string
+		Applications []string
 	}{
-		Makes:  makes,
-		Applys: applys,
+		Makes:        makes,
+		Applys:       applys,
+		Applications: applications,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to write Makefile: %v", err)

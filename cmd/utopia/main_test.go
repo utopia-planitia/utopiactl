@@ -10,8 +10,6 @@ import (
 
 func TestUtopia(t *testing.T) {
 
-	os.RemoveAll("testdata/input/customized")
-
 	orgPWD := os.Getenv("PWD")
 	defer os.Chdir(orgPWD)
 	osArgs := os.Args

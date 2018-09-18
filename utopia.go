@@ -25,28 +25,35 @@ func Customize(directory string, repos []string) error {
 
 	for _, repo := range repos {
 
-		if skipRepo(directory, repo) {
+		if repo == customizedRepo {
 			continue
 		}
-
 		configTemplatesDir := filepath.Join(directory, repo, templatesDir)
+
+		if _, err := os.Stat(configTemplatesDir); os.IsNotExist(err) {
+			continue
+		}
 
 		err := filepath.Walk(configTemplatesDir, parseConfig(&jt, customizedPath, repo, directory))
 		if err != nil {
 			return fmt.Errorf("customization failed for repo %v: %v", repo, err)
 		}
 
-		if _, err := os.Stat(filepath.Join(configTemplatesDir, "Makefile")); err == nil {
-			err = makeConfigure(configTemplatesDir)
-			if err != nil {
-				return fmt.Errorf("make configure (%v): %v", repo, err)
-			}
-		}
 	}
 
 	err := renderJinja2(customizedPath, jt)
 	if err != nil {
 		return fmt.Errorf("jinja2 rendering via ansible failed: %v", err)
+	}
+
+	for _, repo := range repos {
+		dir := filepath.Join(customizedPath, repo)
+		if _, err := os.Stat(filepath.Join(dir, "Makefile")); err == nil {
+			err = makeConfigure(dir)
+			if err != nil {
+				return fmt.Errorf("make configure (%v): %v", repo, err)
+			}
+		}
 	}
 
 	err = generateMakefile(directory, customizedPath)
@@ -55,19 +62,6 @@ func Customize(directory string, repos []string) error {
 	}
 
 	return nil
-}
-
-func skipRepo(directory, repo string) bool {
-	if repo == customizedRepo {
-		return true
-	}
-
-	configTemplatesDir := filepath.Join(directory, repo, templatesDir)
-	if _, err := os.Stat(configTemplatesDir); os.IsNotExist(err) {
-		return true
-	}
-
-	return false
 }
 
 func parseConfig(jinja2Templates *[]jinja2Template, customizePath, repo, directory string) filepath.WalkFunc {
