@@ -3,6 +3,7 @@ package utopia
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,10 +12,37 @@ import (
 const customizedRepo = "customized"
 const templatesDir = "config-templates"
 
-// Customize updates the customized repository. All repositories are located in
-// directory, only repositories listen in repos are updated. It renders jinja2
-// templates using Ansible and creates a Makefile to apply the custom
-// configuration to Kubernetes.
+// CustomizeDir reconfigures all repositories found in directory.
+func CustomizeDir(directory string) error {
+
+	repos, err := subDirectories(directory)
+	if err != nil {
+		return fmt.Errorf("failed to list repos: %v", err)
+	}
+
+	return Customize(directory, repos)
+}
+
+func subDirectories(path string) ([]string, error) {
+	contents, err := ioutil.ReadDir(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read dir: %v", err)
+	}
+
+	subDirectories := []string{}
+	for _, content := range contents {
+		if !content.IsDir() {
+			continue
+		}
+		subDirectories = append(subDirectories, content.Name())
+	}
+	return subDirectories, nil
+}
+
+// Customize updates the customized repository. All repositories have to be
+// located in directory, only repositories listen in repos are updated.
+// It renders jinja2 templates using Ansible and creates a Makefile to apply
+// the custom configuration to Kubernetes.
 // Makefile targets 'make configure' and 'make deploy' are hooks to sidestep the
 // default template & kubectl behavior.
 func Customize(directory string, repos []string) error {
