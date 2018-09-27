@@ -16,7 +16,7 @@ const playbookSource = `
 - hosts: localhost
   tasks:
 {{ range . }}
-  - name: render configuration template
+  - name: render configuration template {{ .Src }}
     template:
       src: "{{ .Src }}"
       dest: "{{ .Dest }}"

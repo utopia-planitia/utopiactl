@@ -23,22 +23,6 @@ func CustomizeDir(directory string) error {
 	return Customize(directory, repos)
 }
 
-func subDirectories(path string) ([]string, error) {
-	contents, err := ioutil.ReadDir(path)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read dir: %v", err)
-	}
-
-	subDirectories := []string{}
-	for _, content := range contents {
-		if !content.IsDir() {
-			continue
-		}
-		subDirectories = append(subDirectories, content.Name())
-	}
-	return subDirectories, nil
-}
-
 // Customize updates the customized repository. All repositories have to be
 // located in directory, only repositories listen in repos are updated.
 // It renders jinja2 templates using Ansible and creates a Makefile to apply
@@ -52,6 +36,22 @@ func Customize(directory string, repos []string) error {
 	jt := []jinja2Template{}
 
 	for _, repo := range repos {
+		if repo == customizedRepo {
+			continue
+		}
+
+		err := copyVars(directory, customizedPath, repo, "group_vars")
+		if err != nil {
+			return err
+		}
+
+		err = copyVars(directory, customizedPath, repo, "host_vars")
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, repo := range repos {
 
 		if repo == customizedRepo {
 			continue
@@ -62,7 +62,7 @@ func Customize(directory string, repos []string) error {
 			continue
 		}
 
-		err := filepath.Walk(configTemplatesDir, parseConfig(&jt, customizedPath, repo, directory))
+		err := filepath.Walk(configTemplatesDir, regenerateConfig(&jt, customizedPath, repo, directory))
 		if err != nil {
 			return fmt.Errorf("customization failed for repo %v: %v", repo, err)
 		}
@@ -92,7 +92,23 @@ func Customize(directory string, repos []string) error {
 	return nil
 }
 
-func parseConfig(jinja2Templates *[]jinja2Template, customizePath, repo, directory string) filepath.WalkFunc {
+func subDirectories(path string) ([]string, error) {
+	contents, err := ioutil.ReadDir(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read dir: %v", err)
+	}
+
+	subDirectories := []string{}
+	for _, content := range contents {
+		if !content.IsDir() {
+			continue
+		}
+		subDirectories = append(subDirectories, content.Name())
+	}
+	return subDirectories, nil
+}
+
+func regenerateConfig(jinja2Templates *[]jinja2Template, customizePath, repo, directory string) filepath.WalkFunc {
 	return func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
