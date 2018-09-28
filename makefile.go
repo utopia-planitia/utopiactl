@@ -55,7 +55,9 @@ func generateMakefile(directory, customizedPath string) error {
 			continue
 		}
 
-		applications = append(applications, repo)
+		if _, err := os.Stat(filepath.Join(directory, repo, "Makefile")); err == nil {
+			applications = append(applications, repo)
+		}
 
 		repoPath := filepath.Join(directory, repo, templatesDir)
 		if _, err := os.Stat(repoPath); os.IsNotExist(err) {
