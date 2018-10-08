@@ -40,12 +40,12 @@ func Customize(directory string, repos []string) error {
 			continue
 		}
 
-		err := copyVars(directory, customizedPath, repo, "group_vars")
+		err := copyAnsibleVars(directory, customizedPath, repo, "group_vars")
 		if err != nil {
 			return err
 		}
 
-		err = copyVars(directory, customizedPath, repo, "host_vars")
+		err = copyAnsibleVars(directory, customizedPath, repo, "host_vars")
 		if err != nil {
 			return err
 		}
