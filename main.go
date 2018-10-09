@@ -6,9 +6,19 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	utopia "github.com/utopia-planitia/utopiactl/pkg/utopia"
 )
+
+const help = `
+usage:
+	clusterctl configure [service-selector]
+	clusterctl exec [service-selector] [command]
+example:
+	clusterctl configure all
+	clusterctl exec service1,service2 git fetch --all
+`
 
 func main() {
 	cwd, err := os.Getwd()
@@ -16,20 +26,39 @@ func main() {
 		log.Fatalf("failed to determine current working directory: %v", err)
 	}
 
-	repos, err := services(cwd, os.Args[1:])
+	command := os.Args[1]
+
+	svcs, err := services(cwd, os.Args[2])
 	if err != nil {
-		log.Fatalf("failed to setup config: %v", err)
+		log.Fatalf("failed to select services: %v", err)
 	}
 
-	err = utopia.Customize(cwd, repos)
-	if err != nil {
-		log.Fatalf("failed to setup config: %v", err)
+	if contains([]string{"configure", "reconfigure", "config", "cfg", "c"}, command) {
+		err := utopia.Customize(cwd, svcs)
+		if err != nil {
+			log.Fatalf("failed to auto configure: %v", err)
+		}
+		return
 	}
+
+	if contains([]string{"execute", "exec", "exe", "e"}, command) {
+		err := utopia.Exec(cwd, svcs, os.Args[3:])
+		if err != nil {
+			log.Fatalf("failed to execute: %v", err)
+		}
+		return
+	}
+
+	printHelp()
 }
 
-func services(directory string, args []string) ([]string, error) {
-	if len(args) != 0 {
-		return args, nil
+func printHelp() {
+	log.Printf(help)
+}
+
+func services(directory string, ls string) ([]string, error) {
+	if ls != "" && ls != "all" {
+		return strings.Split(ls, ","), nil
 	}
 	services, err := subDirectories(filepath.Join(directory, "services"))
 	if err != nil {
@@ -52,4 +81,13 @@ func subDirectories(path string) ([]string, error) {
 		ls = append(ls, content.Name())
 	}
 	return ls, nil
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }

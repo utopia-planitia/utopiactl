@@ -19,7 +19,7 @@ func autogenerateConfigs(directory string, repos []string) error {
 	}
 
 	for _, repo := range repos {
-		src := filepath.Join(directory, "services", repo, templatesDir)
+		src := filepath.Join(directory, "services", repo, "config-templates")
 		dest := filepath.Join(directory, "configurations", repo)
 		if _, err := os.Stat(src); os.IsNotExist(err) {
 			continue
