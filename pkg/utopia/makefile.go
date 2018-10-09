@@ -2,26 +2,11 @@ package utopia
 
 import (
 	"fmt"
-	"log"
+	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"text/template"
 )
-
-func makeConfigure(generatedConfigDir string) error {
-	cmd := exec.Command("make", "configure")
-	cmd.Dir = generatedConfigDir
-	cmd.Env = append(os.Environ(),
-		fmt.Sprintf("PWD=%s", generatedConfigDir),
-	)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		log.Printf("make output: %s", output)
-		return fmt.Errorf("failed to execute make configure: %v", err)
-	}
-	return nil
-}
 
 const makefileSource = `
 include services/kubernetes/etc/help.mk
@@ -98,4 +83,20 @@ func generateMakefile(directory string) error {
 	}
 
 	return nil
+}
+
+func subDirectories(path string) ([]string, error) {
+	contents, err := ioutil.ReadDir(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read dir: %v", err)
+	}
+
+	subDirectories := []string{}
+	for _, content := range contents {
+		if !content.IsDir() {
+			continue
+		}
+		subDirectories = append(subDirectories, content.Name())
+	}
+	return subDirectories, nil
 }

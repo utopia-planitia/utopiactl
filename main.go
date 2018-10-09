@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 
 	utopia "github.com/utopia-planitia/utopiactl/pkg/utopia"
 )
@@ -15,7 +16,7 @@ func main() {
 		log.Fatalf("failed to determine current working directory: %v", err)
 	}
 
-	repos, err := repositories(cwd, os.Args[1:])
+	repos, err := services(cwd, os.Args[1:])
 	if err != nil {
 		log.Fatalf("failed to setup config: %v", err)
 	}
@@ -26,15 +27,15 @@ func main() {
 	}
 }
 
-func repositories(directory string, args []string) ([]string, error) {
+func services(directory string, args []string) ([]string, error) {
 	if len(args) != 0 {
 		return args, nil
 	}
-	repos, err := subDirectories(directory)
+	services, err := subDirectories(filepath.Join(directory, "services"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to list repositories: %v", err)
 	}
-	return repos, nil
+	return services, nil
 }
 
 func subDirectories(path string) ([]string, error) {
@@ -43,12 +44,12 @@ func subDirectories(path string) ([]string, error) {
 		return nil, fmt.Errorf("failed to read dir: %v", err)
 	}
 
-	subDirectories := []string{}
+	ls := []string{}
 	for _, content := range contents {
 		if !content.IsDir() {
 			continue
 		}
-		subDirectories = append(subDirectories, content.Name())
+		ls = append(ls, content.Name())
 	}
-	return subDirectories, nil
+	return ls, nil
 }

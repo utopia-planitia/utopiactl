@@ -1,4 +1,5 @@
 utopiactl
 testdata/input/customized
 pkg/utopia/testdata/ansible_vars/ansible
-pkg/utopia/testdata/ansible_vars
+pkg/utopia/testdata/autogenerate_configs/configurations
+pkg/utopia/testdata/makefile/Makefile
