@@ -1,2 +1,4 @@
 utopiactl
 testdata/input/customized
+pkg/utopia/testdata/ansible_vars/ansible
+pkg/utopia/testdata/ansible_vars

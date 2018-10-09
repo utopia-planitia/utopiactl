@@ -31,6 +31,11 @@ func CustomizeDir(directory string) error {
 // default template & kubectl behavior.
 func Customize(directory string, repos []string) error {
 
+	err := copyAnsibleVars(directory, repos)
+	if err != nil {
+		return err
+	}
+
 	customizedPath := filepath.Join(directory, customizedRepo)
 
 	jt := []jinja2Template{}
@@ -38,16 +43,6 @@ func Customize(directory string, repos []string) error {
 	for _, repo := range repos {
 		if repo == customizedRepo {
 			continue
-		}
-
-		err := copyAnsibleVars(filepath.Join(directory, repo), customizedPath, "group_vars")
-		if err != nil {
-			return err
-		}
-
-		err = copyAnsibleVars(filepath.Join(directory, repo), customizedPath, "host_vars")
-		if err != nil {
-			return err
 		}
 	}
 
@@ -69,7 +64,7 @@ func Customize(directory string, repos []string) error {
 
 	}
 
-	err := renderJinja2(customizedPath, jt)
+	err = renderJinja2(customizedPath, jt)
 	if err != nil {
 		return fmt.Errorf("jinja2 rendering via ansible failed: %v", err)
 	}
@@ -84,7 +79,7 @@ func Customize(directory string, repos []string) error {
 		}
 	}
 
-	err = generateMakefile(directory, customizedPath)
+	err = generateMakefile(directory)
 	if err != nil {
 		return fmt.Errorf("Makefile creation failed: %v", err)
 	}

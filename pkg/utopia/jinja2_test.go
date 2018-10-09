@@ -16,7 +16,7 @@ func TestJinja(t *testing.T) {
 	}
 	defer os.Remove(dest.Name())
 
-	src, err := filepath.Abs("testdata/jinja.input")
+	src, err := filepath.Abs("testdata/jinja/jinja.input")
 	if err != nil {
 		t.Errorf("failed to find input path: %v", err)
 	}
@@ -25,12 +25,12 @@ func TestJinja(t *testing.T) {
 		Src:  src,
 		Dest: dest.Name(),
 	}}
-	err = renderJinja2("testdata", jt)
+	err = renderJinja2("testdata/jinja/ansible", jt)
 	if err != nil {
 		t.Errorf("failed to use jinja: %v", err)
 	}
 
-	golden, err := ioutil.ReadFile("testdata/jinja.golden")
+	golden, err := ioutil.ReadFile("testdata/jinja/jinja.golden")
 	if err != nil {
 		t.Errorf("failed to read golden state: %v", err)
 	}

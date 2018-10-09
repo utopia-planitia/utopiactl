@@ -28,9 +28,9 @@ type jinja2Template struct {
 	Src, Dest string
 }
 
-func renderJinja2(customizePath string, t []jinja2Template) error {
+func renderJinja2(ansiblePath string, t []jinja2Template) error {
 
-	playbook, err := ioutil.TempFile(customizePath, playbookPrefix)
+	playbook, err := ioutil.TempFile(ansiblePath, playbookPrefix)
 	if err != nil {
 		return fmt.Errorf("failed to create playbook: %v", err)
 	}

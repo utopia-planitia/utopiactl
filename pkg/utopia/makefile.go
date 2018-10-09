@@ -29,46 +29,44 @@ include services/kubernetes/etc/cli.mk
 
 deploy: services configurations ##@setup apply all applications and configurations
 
-applications: ##@setup apply all applications{{ range .Applications }}
-	cd ../{{ . }} && make deploy{{ end }}
+services: ##@setup apply all applications{{ range .Applications }}
+	cd services/{{ . }} && make deploy{{ end }}
 
 configurations: ##@setup apply all configurations
 	$(CLI) kubectl apply -R \
-{{ range .Applys }}		-f {{ . }} \
+{{ range .Applys }}		-f configurations/{{ . }} \
 {{ end }}
-{{ range .Makes }}	cd {{ . }} && make deploy
+{{ range .Makes }}	cd configurations/{{ . }} && make deploy
 {{ end }}`
 
-func generateMakefile(directory, customizedPath string) error {
+func generateMakefile(directory string) error {
 
-	repos, err := subDirectories(directory)
+	services, err := subDirectories(filepath.Join(directory, "services"))
 	if err != nil {
-		return fmt.Errorf("failed to list repos: %v", err)
+		return fmt.Errorf("failed to list services: %v", err)
 	}
 
-	makes := []string{}
-	applys := []string{}
 	applications := []string{}
-	for _, repo := range repos {
-
-		if repo == customizedRepo || repo == "hetzner" || repo == "kubernetes" {
+	for _, svc := range services {
+		if _, err := os.Stat(filepath.Join(directory, "services", svc, "Makefile")); err != nil {
 			continue
 		}
+		applications = append(applications, svc)
+	}
 
-		if _, err := os.Stat(filepath.Join(directory, repo, "Makefile")); err == nil {
-			applications = append(applications, repo)
-		}
+	configs, err := subDirectories(filepath.Join(directory, "configurations"))
+	if err != nil {
+		return fmt.Errorf("failed to list services: %v", err)
+	}
 
-		repoPath := filepath.Join(directory, repo, templatesDir)
-		if _, err := os.Stat(repoPath); os.IsNotExist(err) {
+	cfgMakes := []string{}
+	cfgApplys := []string{}
+	for _, cfg := range configs {
+		if _, err := os.Stat(filepath.Join(directory, "configurations", cfg, "Makefile")); err == nil {
+			cfgMakes = append(cfgMakes, cfg)
 			continue
 		}
-
-		if _, err := os.Stat(filepath.Join(repoPath, "Makefile")); err == nil {
-			makes = append(makes, repo)
-		} else {
-			applys = append(applys, repo)
-		}
+		cfgApplys = append(cfgApplys, cfg)
 	}
 
 	makefileTemplate, err := template.New("makefile").Parse(makefileSource)
@@ -76,7 +74,7 @@ func generateMakefile(directory, customizedPath string) error {
 		return fmt.Errorf("failed to parse makefile template: %v", err)
 	}
 
-	makefile, err := os.OpenFile(filepath.Join(customizedPath, "Makefile"), os.O_WRONLY|os.O_CREATE, 0644)
+	makefile, err := os.OpenFile(filepath.Join(directory, "Makefile"), os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		return fmt.Errorf("opening Makefile failed: %v", err)
 	}
@@ -91,8 +89,8 @@ func generateMakefile(directory, customizedPath string) error {
 		Applys       []string
 		Applications []string
 	}{
-		Makes:        makes,
-		Applys:       applys,
+		Makes:        cfgMakes,
+		Applys:       cfgApplys,
 		Applications: applications,
 	})
 	if err != nil {

@@ -7,22 +7,41 @@ import (
 	"strings"
 )
 
-func copyAnsibleVars(repoPath, customizedPath, vars string) error {
+func copyAnsibleVars(directory string, services []string) error {
 
-	source := filepath.Join(repoPath, vars)
-	target := filepath.Join(customizedPath, vars)
-
-	if _, err := os.Stat(source); err != nil {
-		return nil
+	dest := filepath.Join(directory, "ansible", "host_vars")
+	for _, svc := range services {
+		src := filepath.Join(directory, "services", svc, "host_vars")
+		if _, err := os.Stat(src); err == nil {
+			err := mergeCopy(src, dest)
+			if err != nil {
+				return fmt.Errorf("failed to copy %s: %s", src, err)
+			}
+		}
 	}
+
+	dest = filepath.Join(directory, "ansible", "group_vars")
+	for _, svc := range services {
+		src := filepath.Join(directory, "services", svc, "group_vars")
+		if _, err := os.Stat(src); err == nil {
+			err := mergeCopy(src, dest)
+			if err != nil {
+				return fmt.Errorf("failed to copy %s: %s", src, err)
+			}
+		}
+	}
+
+	return nil
+}
+
+func mergeCopy(source, target string) error {
 
 	cp := func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
-		subPath := strings.TrimPrefix(path, source)
-		dest := filepath.Join(target, subPath)
+		dest := filepath.Join(target, strings.TrimPrefix(path, source))
 
 		if info.IsDir() {
 			return os.MkdirAll(dest, 0755)
@@ -31,11 +50,9 @@ func copyAnsibleVars(repoPath, customizedPath, vars string) error {
 		return copy(path, dest)
 	}
 
-	if _, err := os.Stat(source); err == nil {
-		err := filepath.Walk(source, cp)
-		if err != nil {
-			return fmt.Errorf("%s sync failed for repo %v: %v", vars, repoPath, err)
-		}
+	err := filepath.Walk(source, cp)
+	if err != nil {
+		return fmt.Errorf("could walk through filepath %s: %v", source, err)
 	}
 
 	return nil
