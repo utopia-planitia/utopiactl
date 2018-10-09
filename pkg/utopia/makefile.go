@@ -24,10 +24,10 @@ func makeConfigure(generatedConfigDir string) error {
 }
 
 const makefileSource = `
-include ../kubernetes/etc/help.mk
-include ../kubernetes/etc/cli.mk
+include services/kubernetes/etc/help.mk
+include services/kubernetes/etc/cli.mk
 
-deploy: applications configurations ##@setup apply all applications and configurations
+deploy: services configurations ##@setup apply all applications and configurations
 
 applications: ##@setup apply all applications{{ range .Applications }}
 	cd ../{{ . }} && make deploy{{ end }}
@@ -83,7 +83,7 @@ func generateMakefile(directory, customizedPath string) error {
 	defer makefile.Close()
 	err = makefile.Truncate(0)
 	if err != nil {
-		return fmt.Errorf("resetting Makefile failed: %v", err)
+		return fmt.Errorf("truncating Makefile failed: %v", err)
 	}
 
 	err = makefileTemplate.Execute(makefile, struct {

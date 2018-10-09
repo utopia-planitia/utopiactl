@@ -34,7 +34,7 @@ func copyAnsibleVars(repoPath, customizedPath, vars string) error {
 	if _, err := os.Stat(source); err == nil {
 		err := filepath.Walk(source, cp)
 		if err != nil {
-			return fmt.Errorf("%s sync failed for repo %v: %v", vars, repo, err)
+			return fmt.Errorf("%s sync failed for repo %v: %v", vars, repoPath, err)
 		}
 	}
 

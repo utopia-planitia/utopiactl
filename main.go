@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	utopia "github.com/utopia-planitia/utopia-planitia"
+	utopia "github.com/utopia-planitia/utopiactl/pkg/utopia"
 )
 
 func main() {

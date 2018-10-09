@@ -1,3 +1,2 @@
-utopia-planitia
-cmd/utopiactl/utopiactl
-cmd/utopiactl/testdata/input/customized
+utopiactl
+testdata/input/customized
