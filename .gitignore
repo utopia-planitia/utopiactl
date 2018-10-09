@@ -5,3 +5,4 @@ pkg/utopia/testdata/ansible_vars/ansible
 pkg/utopia/testdata/autogenerate_configs/configurations
 pkg/utopia/testdata/makefile/Makefile
 pkg/utopia/testdata/exec/services/service1/abc
+bazel-*

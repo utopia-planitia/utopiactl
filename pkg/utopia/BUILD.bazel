@@ -1,0 +1,28 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "ansible_vars.go",
+        "autogenerate_config.go",
+        "customize.go",
+        "exec.go",
+        "jinja2.go",
+        "makefile.go",
+    ],
+    importpath = "github.com/utopia-planitia/utopiactl/pkg/utopia",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = [
+        "ansible_vars_test.go",
+        "autogenerate_config_test.go",
+        "exec_test.go",
+        "jinja2_test.go",
+        "makefile_test.go",
+    ],
+    data = glob(["testdata/**"]),
+    embed = [":go_default_library"],
+)

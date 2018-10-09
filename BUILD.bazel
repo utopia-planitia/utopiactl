@@ -1,0 +1,27 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["main.go"],
+    importpath = "github.com/utopia-planitia/utopiactl",
+    visibility = ["//visibility:private"],
+    deps = ["//pkg/utopia:go_default_library"],
+)
+
+go_binary(
+    name = "utopiactl",
+    embed = [":go_default_library"],
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = ["main_test.go"],
+    data = glob(["testdata/**"]),
+    embed = [":go_default_library"],
+)
+
+#load("@bazel_gazelle//:def.bzl", "gazelle")
+
+## gazelle:prefix github.com/utopia-planitia/utopiactl
+#gazelle(name = "gazelle")
