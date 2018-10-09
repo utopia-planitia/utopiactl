@@ -11,8 +11,7 @@ import (
 	utopia "github.com/utopia-planitia/utopiactl/pkg/utopia"
 )
 
-const help = `
-usage:
+const help = `usage:
 	clusterctl configure [service-selector]
 	clusterctl exec [service-selector] [command]
 example:
@@ -24,6 +23,11 @@ func main() {
 	cwd, err := os.Getwd()
 	if err != nil {
 		log.Fatalf("failed to determine current working directory: %v", err)
+	}
+
+	if len(os.Args) <= 3 {
+		printHelp()
+		return
 	}
 
 	command := os.Args[1]
@@ -41,6 +45,11 @@ func main() {
 		return
 	}
 
+	if len(os.Args) <= 4 {
+		printHelp()
+		return
+	}
+
 	if contains([]string{"execute", "exec", "exe", "e"}, command) {
 		err := utopia.Exec(cwd, svcs, os.Args[3:])
 		if err != nil {
@@ -53,7 +62,7 @@ func main() {
 }
 
 func printHelp() {
-	log.Printf(help)
+	os.Stdout.WriteString(help)
 }
 
 func services(directory string, ls string) ([]string, error) {
