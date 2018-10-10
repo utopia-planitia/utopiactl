@@ -25,7 +25,7 @@ func main() {
 		log.Fatalf("failed to determine current working directory: %v", err)
 	}
 
-	if len(os.Args) <= 3 {
+	if len(os.Args) < 3 {
 		printHelp()
 		return
 	}
@@ -45,7 +45,7 @@ func main() {
 		return
 	}
 
-	if len(os.Args) <= 4 {
+	if len(os.Args) < 4 {
 		printHelp()
 		return
 	}
