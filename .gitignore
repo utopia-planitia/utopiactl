@@ -1,7 +1,7 @@
 utopiactl
 testdata/input/customized
 testdata/services/service-repo2/abc
-pkg/utopia/testdata/ansible_vars/ansible
-pkg/utopia/testdata/autogenerate_configs/configurations
-pkg/utopia/testdata/makefile/Makefile
-pkg/utopia/testdata/exec/services/service1/abc
+pkg/testdata/ansible_vars/ansible
+pkg/testdata/autogenerate_configs/configurations
+pkg/testdata/makefile/Makefile
+pkg/testdata/exec/services/service1/abc

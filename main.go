@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	utopia "github.com/utopia-planitia/utopiactl/pkg/utopia"
+	"github.com/utopia-planitia/utopiactl/pkg"
 )
 
 const help = `usage:
