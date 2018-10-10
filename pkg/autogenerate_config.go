@@ -111,6 +111,7 @@ func makeConfigure(generatedConfigDir string) error {
 	cmd.Dir = generatedConfigDir
 	cmd.Env = append(os.Environ(),
 		fmt.Sprintf("PWD=%s", generatedConfigDir),
+		"DOCKER_INTERACTIVE= ",
 	)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
