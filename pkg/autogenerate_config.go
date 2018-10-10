@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func autogenerateConfigs(directory string, repos []string) error {
+func autogenerateConfigs(directory string, services []string) error {
 	jt := []jinja2Template{}
 
 	directory, err := filepath.Abs(directory)
@@ -18,16 +18,16 @@ func autogenerateConfigs(directory string, repos []string) error {
 		return fmt.Errorf("failed to get absolute of directory: %v", err)
 	}
 
-	for _, repo := range repos {
-		src := filepath.Join(directory, "services", repo, "config-templates")
-		dest := filepath.Join(directory, "configurations", repo)
+	for _, svc := range services {
+		src := filepath.Join(directory, "services", svc, "config-templates")
+		dest := filepath.Join(directory, "configurations", svc)
 		if _, err := os.Stat(src); os.IsNotExist(err) {
 			continue
 		}
 
 		err := filepath.Walk(src, walkConfig(&jt, src, dest))
 		if err != nil {
-			return fmt.Errorf("customization failed for repo %v: %v", repo, err)
+			return fmt.Errorf("customization failed for service %v: %v", svc, err)
 		}
 	}
 
@@ -37,12 +37,12 @@ func autogenerateConfigs(directory string, repos []string) error {
 		return fmt.Errorf("jinja2 rendering via ansible failed: %v", err)
 	}
 
-	for _, repo := range repos {
-		dest := filepath.Join(directory, "configurations", repo)
+	for _, svc := range services {
+		dest := filepath.Join(directory, "configurations", svc)
 		if _, err := os.Stat(filepath.Join(dest, "Makefile")); err == nil {
 			err = makeConfigure(dest)
 			if err != nil {
-				return fmt.Errorf("make configure (%v): %v", repo, err)
+				return fmt.Errorf("make configure (%v): %v", svc, err)
 			}
 		}
 	}

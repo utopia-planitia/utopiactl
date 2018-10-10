@@ -12,11 +12,20 @@ import (
 )
 
 const help = `usage:
-	clusterctl configure [service-selector]
-	clusterctl exec [service-selector] [command]
-example:
-	clusterctl configure all
-	clusterctl exec service1,service2 git fetch --all
+	utopiactl configure [service-selector]
+	utopiactl exec [service-selector] [command]
+
+how to add a service:
+	git submodule add git@gitlab.com:utopia-planitia/kured.git services/kured
+	utopiactl configure kured
+	git commit -a -m "added kured (kubernetes reboot daemon)"
+	git push origin master
+
+how to update a service:
+	utopiactl exec kured git pull
+	utopiactl configure kured
+	git commit -a -m "updated kured (kubernetes reboot daemon)"
+	git push origin master
 `
 
 func main() {
@@ -37,7 +46,7 @@ func main() {
 		log.Fatalf("failed to select services: %v", err)
 	}
 
-	if contains([]string{"configure", "reconfigure", "config", "cfg", "c"}, command) {
+	if contains([]string{"configure", "reconfigure", "config", "conf", "cfg", "c"}, command) {
 		err := utopia.Customize(cwd, svcs)
 		if err != nil {
 			log.Fatalf("failed to auto configure: %v", err)
