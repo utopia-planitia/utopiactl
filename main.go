@@ -47,7 +47,7 @@ func main() {
 	}
 
 	if contains([]string{"configure", "reconfigure", "config", "conf", "cfg", "c"}, command) {
-		err := utopia.Customize(cwd, svcs)
+		err := utopia.Configure(cwd, svcs)
 		if err != nil {
 			log.Fatalf("failed to auto configure: %v", err)
 		}
