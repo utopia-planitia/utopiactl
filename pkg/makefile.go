@@ -12,11 +12,25 @@ const makefileSource = `
 include services/kubernetes/etc/help.mk
 include services/kubernetes/etc/cli.mk
 
+.PHONY: all
+all: hetzner kubernetes services configurations ##@setup deploy everything
+
+.PHONY: kubernetes
+kubernetes: ##@setup deploy kubernetes
+	cd services/kubernetes && make deploy
+
+.PHONY: hetzner
+hetzner: ##@setup run maintenance for hetzner nodes
+	cd services/hetzner && make maintenance
+
+.PHONY: deploy
 deploy: services configurations ##@setup apply all applications and configurations
 
+.PHONY: services
 services: ##@setup apply all applications{{ range .Applications }}
 	cd services/{{ . }} && make deploy{{ end }}
 
+.PHONY: configurations
 configurations: ##@setup apply all configurations
 	$(CLI) kubectl apply -R \
 {{ range .Applys }}		-f configurations/{{ . }} \
@@ -33,6 +47,10 @@ func generateMakefile(directory string) error {
 
 	applications := []string{}
 	for _, svc := range services {
+		if contains([]string{"hetzner", "kubernetes"}, svc) {
+			continue
+		}
+
 		if _, err := os.Stat(filepath.Join(directory, "services", svc, "Makefile")); err != nil {
 			continue
 		}
@@ -47,6 +65,10 @@ func generateMakefile(directory string) error {
 	cfgMakes := []string{}
 	cfgApplys := []string{}
 	for _, cfg := range configs {
+		if contains([]string{"hetzner", "kubernetes"}, cfg) {
+			continue
+		}
+
 		if _, err := os.Stat(filepath.Join(directory, "configurations", cfg, "Makefile")); err == nil {
 			cfgMakes = append(cfgMakes, cfg)
 			continue
@@ -83,6 +105,15 @@ func generateMakefile(directory string) error {
 	}
 
 	return nil
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
 
 func subDirectories(path string) ([]string, error) {
