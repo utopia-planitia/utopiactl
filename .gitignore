@@ -1,4 +1,5 @@
 utopiactl
+testdata/Makefile
 testdata/input/customized
 testdata/services/service-repo2/abc
 pkg/testdata/ansible_vars/ansible
