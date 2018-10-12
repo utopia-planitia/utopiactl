@@ -14,16 +14,19 @@ import (
 const help = `usage:
 	utopiactl configure [service-selector]
 	utopiactl exec [service-selector] [command]
+	utopiactl deploy [service-selector]
 
 how to add a service:
 	git submodule add git@gitlab.com:utopia-planitia/kured.git services/kured
 	utopiactl configure kured
+	utopiactl deploy kured
 	git commit -a -m "added kured (kubernetes reboot daemon)"
 	git push origin master
 
 how to update a service:
 	utopiactl exec kured git pull
 	utopiactl configure kured
+	utopiactl deploy kured
 	git commit -a -m "updated kured (kubernetes reboot daemon)"
 	git push origin master
 `
@@ -50,6 +53,14 @@ func main() {
 		err := utopia.Configure(cwd, svcs)
 		if err != nil {
 			log.Fatalf("failed to auto configure: %v", err)
+		}
+		return
+	}
+
+	if contains([]string{"deploy"}, command) {
+		err := utopia.Deploy(cwd, svcs)
+		if err != nil {
+			log.Fatalf("failed to deploy: %v", err)
 		}
 		return
 	}
