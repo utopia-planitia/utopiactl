@@ -32,13 +32,13 @@ func makeDeploy(dir string) error {
 	cmd.Dir = dir
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("make deploy: %v: %v", err, output)
+		return fmt.Errorf("make deploy: %v: %s", err, output)
 	}
 	return nil
 }
 
 func deployConfiguration(directory string, svc string) error {
-	if _, err := os.Stat(filepath.Join(directory, "configurations", svc, "Makefile")); err != nil {
+	if _, err := os.Stat(filepath.Join(directory, "configurations", svc, "Makefile")); err == nil {
 		return makeDeploy(filepath.Join(directory, "configurations", svc))
 	}
 	return applyConfiguration(directory, svc)
