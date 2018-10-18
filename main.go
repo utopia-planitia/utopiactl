@@ -16,6 +16,7 @@ service-selector:
 	kubed: selects "kubed"
 	kubed,logging,metrics: selects any service listed
 	all: selects all service folders found
+	-: select the cluster itself
 
 how to add a service:
 	git submodule add git@gitlab.com:utopia-planitia/kured.git services/kured

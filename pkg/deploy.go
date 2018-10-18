@@ -10,6 +10,14 @@ import (
 // Deploy applies the application and configuration definition to kubernetes.
 func Deploy(directory string, services []string) error {
 
+	if len(services) == 0 {
+		err := makeDeploy(directory)
+		if err != nil {
+			return fmt.Errorf("clsuter deployment failed: %v", err)
+		}
+		return nil
+	}
+
 	for _, svc := range services {
 		err := makeDeploy(filepath.Join(directory, "services", svc))
 		if err != nil {
@@ -30,9 +38,11 @@ func makeDeploy(dir string) error {
 		"DOCKER_INTERACTIVE= ",
 	)
 	cmd.Dir = dir
-	output, err := cmd.CombinedOutput()
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
 	if err != nil {
-		return fmt.Errorf("make deploy: %v: %s", err, output)
+		return fmt.Errorf("make deploy: %v", err)
 	}
 	return nil
 }
@@ -52,9 +62,11 @@ func applyConfiguration(directory string, svc string) error {
 		fmt.Sprintf("CMD=kubectl apply -R -f %s", filepath.Join("configurations", svc)),
 	)
 	cmd.Dir = directory
-	output, err := cmd.CombinedOutput()
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
 	if err != nil {
-		return fmt.Errorf("kubectl apply: %v: %v", err, output)
+		return fmt.Errorf("kubectl apply: %v", err)
 	}
 	return nil
 }

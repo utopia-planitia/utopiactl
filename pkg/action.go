@@ -3,20 +3,20 @@ package utopia
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 	"strings"
 )
 
+// ExecuteCommandline parses and runs a command in directory cwd
 func ExecuteCommandline(cwd string, args []string) error {
 
 	if len(args) < 3 {
 		return fmt.Errorf("to few arguments")
 	}
 
-	command := os.Args[1]
+	command := args[1]
 
-	svcs, err := services(cwd, os.Args[2])
+	svcs, err := services(cwd, args[2])
 	if err != nil {
 		return fmt.Errorf("failed to select services: %v", err)
 	}
@@ -37,12 +37,12 @@ func ExecuteCommandline(cwd string, args []string) error {
 		return nil
 	}
 
-	if len(os.Args) < 4 {
+	if len(args) < 4 {
 		return fmt.Errorf("to few arguments")
 	}
 
 	if contains([]string{"execute", "exec", "exe", "e"}, command) {
-		err := Exec(cwd, svcs, os.Args[3:])
+		err := Exec(cwd, svcs, args[3:])
 		if err != nil {
 			return fmt.Errorf("failed to execute: %v", err)
 		}
@@ -53,12 +53,18 @@ func ExecuteCommandline(cwd string, args []string) error {
 }
 
 func services(directory string, ls string) ([]string, error) {
-	if ls != "" && ls != "all" {
+	if ls == "-" {
+		return []string{}, nil
+	}
+	if ls != "all" {
 		return strings.Split(ls, ","), nil
 	}
 	services, err := subDirectories(filepath.Join(directory, "services"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to list repositories: %v", err)
+	}
+	if len(services) == 0 {
+		return nil, fmt.Errorf("could not find services")
 	}
 	return services, nil
 }
