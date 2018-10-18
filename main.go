@@ -1,12 +1,8 @@
 package main
 
 import (
-	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
-	"path/filepath"
-	"strings"
 
 	"github.com/utopia-planitia/utopiactl/pkg"
 )
@@ -15,6 +11,11 @@ const help = `usage:
 	utopiactl configure [service-selector]
 	utopiactl exec [service-selector] [command]
 	utopiactl deploy [service-selector]
+
+service-selector:
+	kubed: selects "kubed"
+	kubed,logging,metrics: selects any service listed
+	all: selects all service folders found
 
 how to add a service:
 	git submodule add git@gitlab.com:utopia-planitia/kured.git services/kured
@@ -37,86 +38,18 @@ func main() {
 		log.Fatalf("failed to determine current working directory: %v", err)
 	}
 
-	if len(os.Args) < 3 {
+	if len(os.Args) <= 2 {
 		printHelp()
 		return
 	}
 
-	command := os.Args[1]
-
-	svcs, err := services(cwd, os.Args[2])
+	err = utopia.ExecuteCommandline(cwd, os.Args)
 	if err != nil {
-		log.Fatalf("failed to select services: %v", err)
-	}
-
-	if contains([]string{"configure", "reconfigure", "config", "conf", "cfg", "c"}, command) {
-		err := utopia.Configure(cwd, svcs)
-		if err != nil {
-			log.Fatalf("failed to auto configure: %v", err)
-		}
-		return
-	}
-
-	if contains([]string{"deploy"}, command) {
-		err := utopia.Deploy(cwd, svcs)
-		if err != nil {
-			log.Fatalf("failed to deploy: %v", err)
-		}
-		return
-	}
-
-	if len(os.Args) < 4 {
+		log.Fatalf("command failed: %v", err)
 		printHelp()
-		return
 	}
-
-	if contains([]string{"execute", "exec", "exe", "e"}, command) {
-		err := utopia.Exec(cwd, svcs, os.Args[3:])
-		if err != nil {
-			log.Fatalf("failed to execute: %v", err)
-		}
-		return
-	}
-
-	printHelp()
 }
 
 func printHelp() {
 	os.Stdout.WriteString(help)
-}
-
-func services(directory string, ls string) ([]string, error) {
-	if ls != "" && ls != "all" {
-		return strings.Split(ls, ","), nil
-	}
-	services, err := subDirectories(filepath.Join(directory, "services"))
-	if err != nil {
-		return nil, fmt.Errorf("failed to list repositories: %v", err)
-	}
-	return services, nil
-}
-
-func subDirectories(path string) ([]string, error) {
-	contents, err := ioutil.ReadDir(path)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read dir: %v", err)
-	}
-
-	ls := []string{}
-	for _, content := range contents {
-		if !content.IsDir() {
-			continue
-		}
-		ls = append(ls, content.Name())
-	}
-	return ls, nil
-}
-
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
 }

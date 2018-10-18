@@ -2,7 +2,6 @@ package utopia
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"text/template"
@@ -105,29 +104,4 @@ func generateMakefile(directory string) error {
 	}
 
 	return nil
-}
-
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
-}
-
-func subDirectories(path string) ([]string, error) {
-	contents, err := ioutil.ReadDir(path)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read dir: %v", err)
-	}
-
-	subDirectories := []string{}
-	for _, content := range contents {
-		if !content.IsDir() {
-			continue
-		}
-		subDirectories = append(subDirectories, content.Name())
-	}
-	return subDirectories, nil
 }
