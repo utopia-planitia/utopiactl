@@ -12,16 +12,19 @@ include services/kubernetes/etc/help.mk
 include services/kubernetes/etc/cli.mk
 
 .PHONY: all
-all: hetzner kubernetes services configurations ##@setup deploy everything
+all: {{ if .HetznerExists }}hetzner {{ end }}{{- if .KubernetesExists -}}kubernetes {{ end }}services configurations ##@setup deploy everything
 
+{{ if .KubernetesExists -}}
 .PHONY: kubernetes
 kubernetes: ##@setup deploy kubernetes
 	cd services/kubernetes && make deploy
 
+{{ end -}}{{ if .HetznerExists -}}
 .PHONY: hetzner
 hetzner: ##@setup run maintenance for hetzner nodes
 	cd services/hetzner && make maintenance
 
+{{ end -}}
 .PHONY: deploy
 deploy: services configurations ##@setup apply all applications and configurations
 
@@ -86,14 +89,28 @@ func generateMakefile(directory string) error {
 		return fmt.Errorf("truncating Makefile failed: %v", err)
 	}
 
+	hetznerExists := false
+	if _, err := os.Stat(filepath.Join(directory, "services", "hetzner", "Makefile")); err == nil {
+		hetznerExists = true
+	}
+
+	kubernetesExists := false
+	if _, err := os.Stat(filepath.Join(directory, "services", "kubernetes", "Makefile")); err == nil {
+		kubernetesExists = true
+	}
+
 	err = makefileTemplate.Execute(makefile, struct {
-		Makes        []string
-		Applys       []string
-		Applications []string
+		Makes            []string
+		Applys           []string
+		Applications     []string
+		HetznerExists    bool
+		KubernetesExists bool
 	}{
-		Makes:        cfgMakes,
-		Applys:       cfgApplys,
-		Applications: applications,
+		Makes:            cfgMakes,
+		Applys:           cfgApplys,
+		Applications:     applications,
+		HetznerExists:    hetznerExists,
+		KubernetesExists: kubernetesExists,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to write Makefile: %v", err)

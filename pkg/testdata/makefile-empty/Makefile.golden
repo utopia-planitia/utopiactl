@@ -3,15 +3,7 @@ include services/kubernetes/etc/help.mk
 include services/kubernetes/etc/cli.mk
 
 .PHONY: all
-all: hetzner kubernetes services configurations ##@setup deploy everything
-
-.PHONY: kubernetes
-kubernetes: ##@setup deploy kubernetes
-	cd services/kubernetes && make deploy
-
-.PHONY: hetzner
-hetzner: ##@setup run maintenance for hetzner nodes
-	cd services/hetzner && make maintenance
+all: services configurations ##@setup deploy everything
 
 .PHONY: deploy
 deploy: services configurations ##@setup apply all applications and configurations
