@@ -3,6 +3,7 @@ package utopia
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"path/filepath"
 	"strings"
 )
@@ -59,30 +60,29 @@ func services(directory string, ls string) ([]string, error) {
 	if ls != "all" {
 		return strings.Split(ls, ","), nil
 	}
-	services, err := subDirectories(filepath.Join(directory, "services"))
-	if err != nil {
-		return nil, fmt.Errorf("failed to list repositories: %v", err)
-	}
+	services := subDirectories(filepath.Join(directory, "services"))
 	if len(services) == 0 {
 		return nil, fmt.Errorf("could not find services")
 	}
 	return services, nil
 }
 
-func subDirectories(path string) ([]string, error) {
+func subDirectories(path string) []string {
+	ls := []string{}
+
 	contents, err := ioutil.ReadDir(path)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read dir: %v", err)
+		log.Printf("failed to read dir: %v", err)
+		return ls
 	}
 
-	ls := []string{}
 	for _, content := range contents {
 		if !content.IsDir() {
 			continue
 		}
 		ls = append(ls, content.Name())
 	}
-	return ls, nil
+	return ls
 }
 
 func contains(s []string, e string) bool {

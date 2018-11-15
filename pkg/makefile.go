@@ -31,18 +31,17 @@ services: ##@setup apply all applications{{ range .Applications }}
 
 .PHONY: configurations
 configurations: ##@setup apply all configurations
+{{- if .Applys }}
 	$(CLI) kubectl apply -R \
 {{ range .Applys }}		-f configurations/{{ . }} \
 {{ end }}
+{{- end }}
 {{ range .Makes }}	cd configurations/{{ . }} && make deploy
 {{ end }}`
 
 func generateMakefile(directory string) error {
 
-	services, err := subDirectories(filepath.Join(directory, "services"))
-	if err != nil {
-		return fmt.Errorf("failed to list services: %v", err)
-	}
+	services := subDirectories(filepath.Join(directory, "services"))
 
 	applications := []string{}
 	for _, svc := range services {
@@ -56,10 +55,7 @@ func generateMakefile(directory string) error {
 		applications = append(applications, svc)
 	}
 
-	configs, err := subDirectories(filepath.Join(directory, "configurations"))
-	if err != nil {
-		return fmt.Errorf("failed to list services: %v", err)
-	}
+	configs := subDirectories(filepath.Join(directory, "configurations"))
 
 	cfgMakes := []string{}
 	cfgApplys := []string{}
