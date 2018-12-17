@@ -45,6 +45,7 @@ configurations: ##@setup apply all configurations
 func generateMakefile(directory string) error {
 
 	services := subDirectories(filepath.Join(directory, "services"))
+	services = moveStorageToFirst(services)
 
 	applications := []string{}
 	for _, svc := range services {
@@ -59,6 +60,7 @@ func generateMakefile(directory string) error {
 	}
 
 	configs := subDirectories(filepath.Join(directory, "configurations"))
+	configs = moveStorageToFirst(configs)
 
 	cfgMakes := []string{}
 	cfgApplys := []string{}
@@ -117,4 +119,19 @@ func generateMakefile(directory string) error {
 	}
 
 	return nil
+}
+
+func moveStorageToFirst(services []string) []string {
+	if !contains(services, "storage") {
+		return services
+	}
+
+	svcs := []string{"storage"}
+	for _, s := range services {
+		if s == "storage" {
+			continue
+		}
+		svcs = append(svcs, s)
+	}
+	return svcs
 }
