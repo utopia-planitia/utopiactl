@@ -10,7 +10,7 @@ jobs:
     steps:
       - run: sudo apt-get update
       - run: sudo apt-get install software-properties-common
-      - run: sudo apt-add-repository ppa:ansible/ansible -y
+      - run: sudo add-apt-repository ppa:ansible/ansible -y
       - run: sudo apt-get update
       - run: sudo apt-get install ansible --allow-unauthenticated
       - checkout
