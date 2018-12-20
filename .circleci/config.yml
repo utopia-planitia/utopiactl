@@ -11,6 +11,7 @@ jobs:
       - run: sudo apt-get update
       - run: sudo apt-get install software-properties-common
       - run: sudo add-apt-repository ppa:ansible/ansible -y
+      - run: sudo sh -c 'echo "deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main" > /etc/apt/sources.list.d/ansible-ubuntu-ansible-disco.list'
       - run: sudo apt-get update
       - run: sudo apt-get install ansible --allow-unauthenticated
       - checkout
