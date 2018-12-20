@@ -10,7 +10,7 @@ import (
 
 func TestAutogenerateConfigs(t *testing.T) {
 
-	services := []string{"repo1", "repo2", "repo3"}
+	services := []string{"repo1", "repo2", "repo3", "repo4"}
 	err := autogenerateConfigs("testdata/autogenerate_configs", services)
 	if err != nil {
 		t.Errorf("failed to autogenerate configurations: %v", err)
@@ -19,6 +19,7 @@ func TestAutogenerateConfigs(t *testing.T) {
 	files := []string{
 		"repo2/static",
 		"repo2/variable",
+		"repo4/roles/template.j2",
 	}
 
 	for _, file := range files {

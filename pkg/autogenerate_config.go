@@ -66,6 +66,10 @@ func walkConfig(jinja2Templates *[]jinja2Template, serviceDir, configDir string)
 			return copy(path, dest)
 		}
 
+		if strings.HasPrefix(strings.TrimPrefix(path, serviceDir), "/roles") {
+			return copy(path, dest)
+		}
+
 		*jinja2Templates = append(*jinja2Templates, jinja2Template{
 			Src:  path,
 			Dest: strings.TrimSuffix(dest, jinjaSuffix),
