@@ -62,7 +62,7 @@ func TestMakefileEmpty(t *testing.T) {
 	defer os.Remove("testdata/makefile-empty/Makefile")
 }
 
-func Test_moveStorageToFirst(t *testing.T) {
+func Test_moveStorageToTheTop(t *testing.T) {
 	type args struct {
 		services []string
 	}
@@ -102,8 +102,8 @@ func Test_moveStorageToFirst(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := moveStorageToFirst(tt.args.services); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("moveStorageToFirst() = %v, want %v", got, tt.want)
+			if got := moveServiceToFirst(tt.args.services, "storage"); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("moveServiceToFirst() = %v, want %v", got, tt.want)
 			}
 		})
 	}
