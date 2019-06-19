@@ -38,6 +38,14 @@ func ExecuteCommandline(cwd string, args []string) error {
 		return nil
 	}
 
+	if contains([]string{"compare-versions"}, command) {
+		err := CompareVersions(cwd, svcs)
+		if err != nil {
+			return fmt.Errorf("failed to compare versions: %v", err)
+		}
+		return nil
+	}
+
 	if len(args) < 4 {
 		return fmt.Errorf("to few arguments")
 	}

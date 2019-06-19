@@ -4,13 +4,14 @@ import (
 	"log"
 	"os"
 
-	"github.com/utopia-planitia/utopiactl/pkg"
+	utopia "github.com/utopia-planitia/utopiactl/pkg"
 )
 
 const help = `usage:
 	utopiactl configure [service-selector]
 	utopiactl exec [service-selector] [command]
 	utopiactl deploy [service-selector]
+	utopiactl compare-versions [service-selector]
 
 service-selector:
 	kubed: selects "kubed"
@@ -31,6 +32,9 @@ how to update a service:
 	utopiactl deploy kured
 	git commit -a -m "updated kured (kubernetes reboot daemon)"
 	git push origin master
+
+how to compare current state with available updates:
+	utopiactl compare-versions all
 `
 
 func main() {
@@ -48,6 +52,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("command failed: %v", err)
 		printHelp()
+		os.Exit(1)
 	}
 }
 
