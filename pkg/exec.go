@@ -36,13 +36,10 @@ func execCommand(dir string, command []string) error {
 	cmd.Env = append(os.Environ(),
 		fmt.Sprintf("PWD=%s", dir),
 		"DOCKER_INTERACTIVE= ",
+		"MAKE=make",
 	)
 	cmd.Dir = dir
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("command throw error: %v", err)
-	}
-	return nil
+	return cmd.Run()
 }

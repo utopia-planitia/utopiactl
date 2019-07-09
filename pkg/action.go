@@ -46,6 +46,14 @@ func ExecuteCommandline(cwd string, args []string) error {
 		return nil
 	}
 
+	if contains([]string{"tests", "test"}, command) {
+		err := VerifyTests(cwd, svcs)
+		if err != nil {
+			return fmt.Errorf("failed to test: %v", err)
+		}
+		return nil
+	}
+
 	if len(args) < 4 {
 		return fmt.Errorf("to few arguments")
 	}
