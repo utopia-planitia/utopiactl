@@ -12,7 +12,8 @@ const help = `usage:
 	utopiactl exec [service-selector] [command]
 	utopiactl deploy [service-selector]
 	utopiactl compare-versions [service-selector]
-	utopiactl test [service-selector]
+	utopiactl tests [service-selector]
+	utopiactl test-all-services [service-selector]
 
 service-selector:
 	kubed: selects "kubed"

@@ -47,9 +47,17 @@ func ExecuteCommandline(cwd string, args []string) error {
 	}
 
 	if contains([]string{"tests", "test"}, command) {
-		err := VerifyTests(cwd, svcs)
+		_, err := VerifyTests(cwd, svcs, false)
 		if err != nil {
 			return fmt.Errorf("failed to test: %v", err)
+		}
+		return nil
+	}
+
+	if contains([]string{"test-all-services"}, command) {
+		failedServices, err := VerifyTests(cwd, svcs, true)
+		if err != nil {
+			return fmt.Errorf("some services failed: %+q", failedServices)
 		}
 		return nil
 	}

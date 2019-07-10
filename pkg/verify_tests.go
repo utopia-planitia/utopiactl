@@ -8,17 +8,19 @@ import (
 	"path/filepath"
 )
 
-func VerifyTests(directory string, services []string) error {
+func VerifyTests(directory string, services []string, testAllServices bool) ([]error, error) {
 
 	if len(services) == 0 {
-		return fmt.Errorf("service list is missing")
+		return []error{}, fmt.Errorf("service list is missing")
 	}
+
+	failedServices := []error{}
 
 	for _, svc := range services {
 
 		hasTests, err := makeTargetExist("tests", directory, svc)
 		if err != nil {
-			return fmt.Errorf("failed to search 'make tests': %v", err)
+			return []error{}, fmt.Errorf("failed to search 'make tests': %v", err)
 		}
 
 		if !hasTests {
@@ -29,11 +31,17 @@ func VerifyTests(directory string, services []string) error {
 		log.Printf("execute command for service %s\n", svc)
 		err = execCommand(filepath.Join(directory, "services", svc), []string{"make", "tests"})
 		if err != nil {
-			return fmt.Errorf("service tests failed: %v", err)
+			if !testAllServices {
+				return []error{}, fmt.Errorf("service %s tests failed: %v", svc, err)
+			}
+			failedServices = append(failedServices, fmt.Errorf("service %s tests failed: %v", svc, err))
 		}
 	}
 
-	return nil
+	if len(failedServices) != 0 {
+		return failedServices, fmt.Errorf("some services had errors")
+	}
+	return []error{}, nil
 }
 
 func makeTargetExist(target, directory, service string) (bool, error) {
