@@ -29,7 +29,7 @@ func VerifyTests(directory string, services []string, testAllServices bool) ([]e
 		}
 
 		log.Printf("execute command for service %s\n", svc)
-		err = execCommand(filepath.Join(directory, "services", svc), []string{"make", "tests"})
+		err = execCommand(filepath.Join(directory, "services", svc), []string{"make", "-s", "tests"})
 		if err != nil {
 			if !testAllServices {
 				return []error{}, fmt.Errorf("service %s tests failed: %v", svc, err)
