@@ -8,10 +8,13 @@ import (
 
 func TestCopyAnsibleVars(t *testing.T) {
 
-	removeContents("testdata/ansible_vars/ansible")
+	err := removeContents("testdata/ansible_vars/ansible")
+	if err != nil {
+		t.Errorf("failed to cleanup: %v", err)
+	}
 
 	services := []string{"repo1", "repo2", "repo3"}
-	err := copyAnsibleVars("testdata/ansible_vars", services)
+	err = copyAnsibleVars("testdata/ansible_vars", services)
 	if err != nil {
 		t.Errorf("failed to copy ansible vars: %v", err)
 	}

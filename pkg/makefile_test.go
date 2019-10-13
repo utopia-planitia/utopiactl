@@ -27,7 +27,7 @@ func TestMakefile(t *testing.T) {
 		t.Errorf("failed to read result: %v", err)
 		return
 	}
-	if bytes.Compare(result, golden) != 0 {
+	if !bytes.Equal(result, golden) {
 		t.Errorf("Makefile was incorrect, got: %+s, want: %+s.", result, golden)
 		return
 	}
@@ -54,7 +54,7 @@ func TestMakefileEmpty(t *testing.T) {
 		t.Errorf("failed to read result: %v", err)
 		return
 	}
-	if bytes.Compare(result, golden) != 0 {
+	if !bytes.Equal(result, golden) {
 		t.Errorf("Makefile was incorrect, got: %+s, want: %+s.", result, golden)
 		return
 	}

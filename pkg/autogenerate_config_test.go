@@ -35,7 +35,7 @@ func TestAutogenerateConfigs(t *testing.T) {
 		if err != nil {
 			t.Errorf("failed to read result: %v", err)
 		}
-		if bytes.Compare(result, golden) != 0 {
+		if !bytes.Equal(result, golden) {
 			t.Errorf("config generation was incorrect, got: %+s, want: %+s.", result, golden)
 		}
 	}
