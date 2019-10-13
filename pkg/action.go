@@ -22,10 +22,18 @@ func ExecuteCommandline(cwd string, args []string) error {
 		return fmt.Errorf("failed to select services: %v", err)
 	}
 
-	if contains([]string{"configure", "reconfigure", "config", "conf", "cfg", "c"}, command) {
+	if contains([]string{"configure", "reconfigure", "config", "conf", "cfg"}, command) {
 		err := Configure(cwd, svcs)
 		if err != nil {
 			return fmt.Errorf("failed to auto configure: %v", err)
+		}
+		return nil
+	}
+
+	if contains([]string{"dependencies", "deps", "dep"}, command) {
+		err := Dependencies(cwd, svcs)
+		if err != nil {
+			return fmt.Errorf("failed to generate dependencies: %v", err)
 		}
 		return nil
 	}

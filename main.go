@@ -14,6 +14,7 @@ const help = `usage:
 	utopiactl compare-versions [service-selector]
 	utopiactl tests [service-selector]
 	utopiactl test-all-services [service-selector]
+	utopiactl dependencies [service-selector]
 
 service-selector:
 	kubed: selects "kubed"
@@ -37,6 +38,9 @@ how to update a service:
 
 how to compare current state with available updates:
 	utopiactl compare-versions all
+
+dependencies example:
+	utopiactl deps all | m4 | dot -Tpng > dependencies.png
 `
 
 func main() {
