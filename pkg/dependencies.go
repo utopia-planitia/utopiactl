@@ -13,6 +13,7 @@ func Dependencies(directory string, services []string) error {
 
 	buffer.WriteString("digraph {\n")
 	buffer.WriteString("define(digraph,subgraph)\n")
+	buffer.WriteString("node [shape=box];\n")
 
 	for _, svc := range services {
 		file := filepath.Join("services", svc, "dependencies.dot")
