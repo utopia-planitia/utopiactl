@@ -40,7 +40,7 @@ how to compare current state with available updates:
 	utopiactl compare-versions all
 
 dependencies example:
-	utopiactl deps all | m4 | dot -Tpng > dependencies.png
+	RANKSEP=3 utopiactl deps all | m4 | dot -Tpng > dependencies.png
 `
 
 func main() {
