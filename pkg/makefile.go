@@ -47,6 +47,7 @@ func generateMakefile(directory string) error {
 	services := subDirectories(filepath.Join(directory, "services"))
 	services = moveServiceToFirst(services, "metrics")
 	services = moveServiceToFirst(services, "storage")
+	services = moveServiceToFirst(services, "priority-class-patcher")
 
 	applications := []string{}
 	for _, svc := range services {
